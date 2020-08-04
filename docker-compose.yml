@@ -1,0 +1,29 @@
+version: '2'
+services:
+    back:
+        container_name: back-app-wall
+        build: .
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/back
+        depends_on:
+            - mongo
+    mongo:
+        container_name: mongo
+        environment: 
+            - MONGO_DATABASE_USERNAME=productListUser
+            - MONGO_DATABASE_PASSWORD=productListPassword
+            - MONGO_DATABASE_NAME=promotions
+            - MONGO_INITDB_ROOT_USERNAME=productListUser
+            - MONGO_INITDB_ROOT_PASSWORD=productListPassword
+            - MONGO_INITDB_DATABASE=promotions
+        image: mongo
+        volumes:
+            - ./tmp/mongoinit/:/docker-entrypoint-initdb.d/000_createUser.js
+            - ./tmp/mongoinit/:/docker-entrypoint-initdb.d/001-products.json
+            #- ./tmp/mongoinit/:/docker-entrypoint-initdb.d/01-import.js
+            - ./tmp/mongoinit/home/mongodb:/home/mongodb
+        command: mongoimport --host mongo--db promotions --collection products --file 001-products.json --jsonArray
+        ports: 
+            - "27017:27017"
